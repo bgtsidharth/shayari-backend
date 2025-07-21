@@ -16,7 +16,7 @@ app.add_middleware(
 )
 
 # Your OpenAI key (set this securely in Render as an environment variable)
-openai.api_key = "your-openai-api-key"
+openai.api_key = "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"
 
 # Define request model
 class QRData(BaseModel):
