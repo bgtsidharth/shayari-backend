@@ -1,35 +1,39 @@
 from fastapi import FastAPI
-from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
-import openai
+from pydantic import BaseModel
+from openai import OpenAI
+import os
 
 # Initialize FastAPI app
 app = FastAPI()
 
-# CORS setup so your GitHub Pages frontend can call this backend
+# CORS setup for GitHub Pages frontend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # You can replace "*" with your domain for tighter security
+    allow_origins=["*"],  # Replace with your domain for more control
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Your OpenAI key (set this securely in Render as an environment variable)
-openai.api_key = "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"
+# Initialize OpenAI client
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
-# Define request model
+# Request schema
 class QRData(BaseModel):
     keyword: str
     emotion: str = "romantic"
 
-# Route to generate shayari
+# POST route to generate shayari
 @app.post("/generate")
 async def generate_shayari(data: QRData):
-    prompt = f"Write a short Hindi shayari about '{data.keyword}' with a '{data.emotion}' mood. Keep it poetic, 2 to 4 lines."
+    prompt = (
+        f"Write a short Hindi shayari with a '{data.emotion}' mood about '{data.keyword}'. "
+        "It should be poetic, 2 to 4 lines, and emotionally impactful."
+    )
 
     try:
-        response = openai.ChatCompletion.create(
+        response = client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[{"role": "user", "content": prompt}]
         )
